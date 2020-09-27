@@ -1,0 +1,96 @@
+---
+title: "lab3"
+author: "Muhammad Idris"
+date: "9/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exploring General Social Survey
+
+Load data
+```{r}
+library(tidyverse)
+dat <- readxl::read_xls('GSS.xls')
+dat
+```
+
+Clean data  
+```{r}
+dat_clean <- dat %>% rename(marital_status='Marital status', years_school='Highest year of school completed', sex='Respondents sex', pol_party='Political party affiliation', happy_lvl='General happiness')
+names(dat_clean)
+dat_clean
+dat_clean <- transform(dat_clean, years_school = as.numeric(years_school))
+class(dat_clean$years_school)
+```
+
+1.Find the average years of education for the respondents with each political party affiliation. Arrange your output in a meaningful order and print. Describe any patterns you find.  
+
+```{r}
+dat1 <-aggregate(years_school~pol_party, dat_clean, mean)
+dat1<- dat1[order(dat1$years_school,decreasing=T),]
+dat1
+```
+  
+2.Create a single data frame containing records for the better educated respondents in each political party affiliation. A “better educated” respondent is someone who has strictly more years of education than the median in the same party affiliation. Print the structure of the data frame.
+
+```{r}
+#dat2 <-aggregate(years_school~pol_party, dat_clean, median)
+#dat2 <- dat_clean %>% filter (years_school>median(years_school))
+#str(dat2)
+dat2 <-dat_clean %>% 
+  select(years_school, pol_party) %>%
+  group_by(pol_party) %>% 
+  filter(years_school > median(years_school, na.rm = TRUE))
+str(dat2)
+```
+  
+3.How is the happiness of a respondent related to his/her marriage status? Define that a person is happy if the response to question is “Very happy” or “Pretty happy”.  
+
+```{r}
+dat_clean$happy_lvl <- sub('Very happy', 'Happy', dat_clean$happy_lvl)
+dat_clean$happy_lvl <- sub('Pretty happy', 'Happy', dat_clean$happy_lvl)
+dat_clean<-na.omit(dat_clean)
+ggplot(dat_clean, aes(x=marital_status, fill=happy_lvl))+geom_bar()+xlab("Marital status")
+```  
+  
+Looks like people are more happy married.  
+
+4.Does party affiliation affect the relationship you found in the last question?  
+```{r}
+dat3 <-dat_clean %>% select(marital_status,happy_lvl, pol_party)
+g <- ggplot(data = dat3, aes(x = marital_status, fill = happy_lvl)) + geom_bar(position = "fill") +coord_flip()+facet_wrap(~pol_party)
+g
+```  
+
+Doesn't look like political party affiliation has any effect, people seem generally happy.  
+
+5.How is marital status related to the education of a respondent? What are possible reasons accounting for the patterns you see? 
+
+```{r}
+ggplot(dat_clean, aes(years_school)) + facet_wrap(~marital_status)+geom_histogram(bins=10)
+```  
+
+It looks the highest frequency of educated people are married. The frequency of education is lower for separated couples. This could be because educated couples make better decisions.  
+
+6.Explore two more interesting questions, and answer those questions using the GSS data.
+
+A) Does sex affect political party affiliation?  
+
+```{r}
+ggplot(dat_clean, aes(x=pol_party, fill=sex))+geom_bar()+coord_flip()+theme_bw()+facet_wrap(~sex, scales="free_x")
+```  
+
+It looks like sex does not affect political part affiliation,levels looks almost proportionate between the two sexes.  
+
+B) What is the relationship between education and sex?  
+
+```{r}
+g1 <- ggplot(dat_clean, aes(x=years_school, fill=sex))+geom_bar()+facet_wrap(~sex, scales="free_x")
+g1 + scale_fill_brewer(palette="Dark2")
+```  
+
+Based on the graph, females have more years of education versus males. 
