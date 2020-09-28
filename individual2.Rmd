@@ -1,7 +1,7 @@
 ---
-title: "lab3"
-author: "Muhammad Idris"
-date: "9/26/2020"
+title: "individual2"
+author: "Cody Nielsen"
+date: "9/27/2020"
 output: html_document
 ---
 
@@ -86,8 +86,6 @@ ggplot(dat_clean, aes(x=pol_party, fill=sex))+geom_bar()+coord_flip()+theme_bw()
 ggplot(dat_clean, aes(x=pol_party,group=sex,fill=sex))+geom_density(adjust=1.5, alpha=.4)+theme(axis.text.x = element_text(angle = 90))
 ```  
 
-It looks like sex does not affect political part affiliation,levels looks almost proportionate between the two sexes.  
-
 B) What is the relationship between education and sex?  
 
 ```{r}
@@ -99,6 +97,4 @@ g2
 
 g3 <- ggplot(dat_clean, aes(x=years_school, group=sex, fill=sex))+geom_density(adjust=1.5, alpha=.4)
 g3
-```  
-
-Based on the graph, females have more years of education versus males. 
+```
